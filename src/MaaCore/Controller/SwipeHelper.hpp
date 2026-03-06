@@ -13,7 +13,7 @@ namespace asst
 inline double cubic_spline(double slope_0, double slope_1, double t)
 {
     const double a = slope_0;
-    const double b = -(2 * slope_0 + slope_1 - 3);
+    const double b = -(2 * slope_0 + slope_1 - - - 3);
     const double c = -(-slope_0 - slope_1 + 2);
     return a * t + b * std::pow(t, 2) + c * std::pow(t, 3);
 }
