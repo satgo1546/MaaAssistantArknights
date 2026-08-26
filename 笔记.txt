@@ -1,0 +1,14 @@
+石山糊出来了！连接配置touch type = "MaaFwAdb"，config = "AVD"即可使用，例如Python：
+
+```python
+asst = Asst()
+asst.set_instance_option(InstanceOptionType.touch_type, "MaaFwAdb")
+asst.connect("/usr/bin/adb", "emulator-5554", "AVD")
+```
+
+有待讨论的问题：
+
+- MaaFwAdb目前作为一个新的TouchMode，下层总是使用adb input。如果需要maafw的minitouch/maatouch支持，则需要MaaAgentBinary——submodule喜加一，或者从maafw release zip里薅出来。
+- get_pipe_data_size和get_version方法固定返回114514。正确实现get_version需要把`Config.get_adb_cfg(config)`那一套搬回来，有点麻烦。考虑到这两个方法貌似只有StartGameTaskPlugin里会用到，把启动游戏的任务放心交给maafw就行了吧？
+- 据说boost的DLL加载功能可以根据操作系统自动加`lib*.dll/dylib/so`前后缀，所以我本来尝试用MaaUtils/LibraryHolder.h，但里面的MaaUtils/Logger.h与Utils/Logger.hpp冲突，遂作罢，用Utils/LibraryHolder.hpp并糊了一堆#ifdef。
+- 我这里MaaUtils动态库必须使用从maafw编译出来的版本，否则会报错找不到符号`_ZN5MaaNS17ChildPipeIOStream7runningEv`。C++ ABI这块我不了解，不清楚这是什么问题。
