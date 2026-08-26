@@ -30,6 +30,12 @@
     <system:String x:Key="BackgroundMonetSelectColor">Select Color</system:String>
     <system:String x:Key="BackgroundMonetAutoTip">Extract dominant color from background image to generate theme palette</system:String>
     <system:String x:Key="UiTheme">UI Theme</system:String>
+    <system:String x:Key="InterfaceFont">Interface Font</system:String>
+    <system:String x:Key="InterfaceFontFile">Font File</system:String>
+    <system:String x:Key="SelectInterfaceFont">Select Font</system:String>
+    <system:String x:Key="ResetInterfaceFont">Use Default</system:String>
+    <system:String x:Key="InterfaceFontInvalid">The selected font could not be loaded. Select a valid TTF or OTF file.</system:String>
+    <system:String x:Key="InterfaceScale">Interface Scale (%)</system:String>
     <system:String x:Key="TransitionSpeed">Transition Animation</system:String>
     <system:String x:Key="TransitionSpeedNormal">Normal</system:String>
     <system:String x:Key="TransitionSpeedFast">Fast</system:String>

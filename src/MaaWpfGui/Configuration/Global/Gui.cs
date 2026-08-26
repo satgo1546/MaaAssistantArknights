@@ -61,6 +61,10 @@ public class Gui : NotifyPropertyChangedWithValue
 
     public TransitionSpeedType TransitionSpeed { get; set; } = TransitionSpeedType.Normal;
 
+    public string InterfaceFontPath { get; set; } = string.Empty;
+
+    public int InterfaceScalePercent { get; set; } = 100;
+
     public bool TaskQueueInverseMode { get; set; }
 
     public bool UseCardLog { get; set; } = true;

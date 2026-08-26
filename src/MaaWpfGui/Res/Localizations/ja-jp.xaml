@@ -30,6 +30,12 @@
     <system:String x:Key="BackgroundMonetSelectColor">色を選択</system:String>
     <system:String x:Key="BackgroundMonetAutoTip">背景画像からメインカラーを自動抽出してテーマ配色を生成します</system:String>
     <system:String x:Key="UiTheme">UI主題</system:String>
+    <system:String x:Key="InterfaceFont">UIフォント</system:String>
+    <system:String x:Key="InterfaceFontFile">フォントファイル</system:String>
+    <system:String x:Key="SelectInterfaceFont">フォントを選択</system:String>
+    <system:String x:Key="ResetInterfaceFont">既定に戻す</system:String>
+    <system:String x:Key="InterfaceFontInvalid">選択したフォントを読み込めません。有効な TTF または OTF ファイルを選択してください。</system:String>
+    <system:String x:Key="InterfaceScale">UI拡大率（%）</system:String>
     <system:String x:Key="TransitionSpeed">切り替えアニメーション</system:String>
     <system:String x:Key="TransitionSpeedNormal">標準</system:String>
     <system:String x:Key="TransitionSpeedFast">高速</system:String>

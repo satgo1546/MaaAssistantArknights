@@ -30,6 +30,12 @@
     <system:String x:Key="BackgroundMonetSelectColor">選擇顏色</system:String>
     <system:String x:Key="BackgroundMonetAutoTip">將從背景圖自動提取主色產生主題配色</system:String>
     <system:String x:Key="UiTheme">介面主題</system:String>
+    <system:String x:Key="InterfaceFont">介面字型</system:String>
+    <system:String x:Key="InterfaceFontFile">字型檔案</system:String>
+    <system:String x:Key="SelectInterfaceFont">選擇字型</system:String>
+    <system:String x:Key="ResetInterfaceFont">恢復預設</system:String>
+    <system:String x:Key="InterfaceFontInvalid">無法載入所選字型檔案，請選擇有效的 TTF 或 OTF 檔案。</system:String>
+    <system:String x:Key="InterfaceScale">介面縮放（%）</system:String>
     <system:String x:Key="TransitionSpeed">過渡動畫</system:String>
     <system:String x:Key="TransitionSpeedNormal">原速</system:String>
     <system:String x:Key="TransitionSpeedFast">快速</system:String>

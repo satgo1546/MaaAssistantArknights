@@ -15,8 +15,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media;
 using HandyControl.Controls;
 using MaaWpfGui.Configuration.Factory;
 using MaaWpfGui.Constants;
@@ -25,6 +28,7 @@ using MaaWpfGui.Main;
 using MaaWpfGui.Utilities;
 using MaaWpfGui.Utilities.ValueType;
 using MaaWpfGui.ViewModels.UI;
+using Microsoft.Win32;
 using Stylet;
 using static MaaWpfGui.Configuration.Global.Gui;
 using DarkModeType = MaaWpfGui.Configuration.Global.Gui.DarkModeType;
@@ -43,6 +47,9 @@ public class GuiSettingsUserControlModel : PropertyChangedBase
         PropertyDependsOnUtility.InitializePropertyDependencies(this);
         LocalizationHelper.LanguageChanged += RefreshLocalization;
         ApplyTransitionSpeed();
+        ConfigFactory.Root.Gui.InterfaceScalePercent = InterfaceScalePercent;
+        InterfaceFontFamily = LoadInterfaceFont(ConfigFactory.Root.Gui.InterfaceFontPath);
+        Application.Current.Resources[SystemFonts.MessageFontFamilyKey] = InterfaceFontFamily;
     }
 
     public static GuiSettingsUserControlModel Instance { get; }
@@ -229,6 +236,92 @@ public class GuiSettingsUserControlModel : PropertyChangedBase
             TransitionSpeedType.None => TimeSpan.Zero,
             _ => TimeSpan.FromMilliseconds(normalMs),
         };
+    }
+
+    public string InterfaceFontPath => ConfigFactory.Root.Gui.InterfaceFontPath;
+
+    public FontFamily InterfaceFontFamily { get; private set; }
+
+    public int InterfaceScalePercent
+    {
+        get => field;
+        set {
+            value = Math.Clamp(value, 50, 200);
+            if (!SetAndNotify(ref field, value))
+            {
+                return;
+            }
+
+            ConfigFactory.Root.Gui.InterfaceScalePercent = value;
+            NotifyOfPropertyChange(nameof(InterfaceScale));
+        }
+    } = Math.Clamp(ConfigFactory.Root.Gui.InterfaceScalePercent, 50, 200);
+
+    public double InterfaceScale => InterfaceScalePercent / 100D;
+
+    public void SelectInterfaceFont()
+    {
+        var dialog = new OpenFileDialog {
+            Filter = LocalizationHelper.GetString("InterfaceFontFile") + "|*.ttf;*.otf",
+            CheckFileExists = true,
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        try
+        {
+            InterfaceFontFamily = LoadInterfaceFont(dialog.FileName, throwOnError: true);
+            Application.Current.Resources[SystemFonts.MessageFontFamilyKey] = InterfaceFontFamily;
+            ConfigFactory.Root.Gui.InterfaceFontPath = dialog.FileName;
+            NotifyOfPropertyChange(nameof(InterfaceFontFamily));
+            NotifyOfPropertyChange(nameof(InterfaceFontPath));
+        }
+        catch (Exception)
+        {
+            Growl.Error(LocalizationHelper.GetString("InterfaceFontInvalid"));
+        }
+    }
+
+    public void ResetInterfaceFont()
+    {
+        ConfigFactory.Root.Gui.InterfaceFontPath = string.Empty;
+        InterfaceFontFamily = SystemFonts.MessageFontFamily;
+        Application.Current.Resources[SystemFonts.MessageFontFamilyKey] = InterfaceFontFamily;
+        NotifyOfPropertyChange(nameof(InterfaceFontFamily));
+        NotifyOfPropertyChange(nameof(InterfaceFontPath));
+    }
+
+    private static FontFamily LoadInterfaceFont(string path, bool throwOnError = false)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                return SystemFonts.MessageFontFamily;
+            }
+
+            var extension = Path.GetExtension(path);
+            if (!extension.Equals(".ttf", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".otf", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new NotSupportedException();
+            }
+
+            var fontUri = new Uri(Path.GetFullPath(path), UriKind.Absolute);
+            var glyphTypeface = new GlyphTypeface(fontUri);
+            var familyName = glyphTypeface.FamilyNames.TryGetValue(CultureInfo.CurrentUICulture, out var localizedName)
+                ? localizedName
+                : glyphTypeface.FamilyNames.TryGetValue(CultureInfo.GetCultureInfo("en-us"), out var englishName)
+                    ? englishName
+                    : glyphTypeface.FamilyNames.Values.First();
+            var directoryUri = new Uri(Path.GetDirectoryName(fontUri.LocalPath) + Path.DirectorySeparatorChar, UriKind.Absolute);
+            return new FontFamily(directoryUri, $"./#{familyName}");
+        }
+        catch when (!throwOnError)
+        {
+            return SystemFonts.MessageFontFamily;
+        }
     }
 
     public void SwitchDarkMode()

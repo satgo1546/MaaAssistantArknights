@@ -125,6 +125,38 @@
                     ItemsSource="{Binding DarkModeList}"
                     SelectedValue="{Binding DarkMode}"
                     SelectedValuePath="Value" />
+                <StackPanel Margin="8">
+                    <controls:TextBlock
+                        Margin="8,0,0,5"
+                        Text="{DynamicResource InterfaceFont}"
+                        TextWrapping="Wrap" />
+                    <TextBox
+                        Width="180"
+                        HorizontalAlignment="Left"
+                        IsReadOnly="True"
+                        Text="{Binding InterfaceFontPath, Mode=OneWay}"
+                        ToolTip="{Binding InterfaceFontPath, Mode=OneWay}" />
+                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                        <Button
+                            Width="85"
+                            Command="{s:Action SelectInterfaceFont}"
+                            Content="{DynamicResource SelectInterfaceFont}" />
+                        <Button
+                            Width="85"
+                            Margin="10,0,0,0"
+                            Command="{s:Action ResetInterfaceFont}"
+                            Content="{DynamicResource ResetInterfaceFont}" />
+                    </StackPanel>
+                </StackPanel>
+                <hc:NumericUpDown
+                    Width="180"
+                    Margin="8"
+                    HorizontalAlignment="Left"
+                    Increment="5"
+                    Maximum="200"
+                    Minimum="50"
+                    hc:InfoElement.Title="{DynamicResource InterfaceScale}"
+                    Value="{Binding InterfaceScalePercent}" />
                 <ComboBox
                     Margin="8"
                     hc:InfoElement.Title="{DynamicResource TransitionSpeed}"
