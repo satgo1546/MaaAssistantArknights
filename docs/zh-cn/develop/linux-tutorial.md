@@ -17,7 +17,7 @@ Mac 可以使用 `tools/build_macos_universal.zsh` 脚本进行编译
 建议参考 MaaAssistantArknights/MaaMacGui 项目的 [README.md](https://github.com/MaaAssistantArknights/MaaMacGui/blob/master/README.md)
 :::
 
-## 编译过程
+## 编译 MaaCore
 
 :::: steps
 
@@ -82,6 +82,51 @@ Mac 可以使用 `tools/build_macos_universal.zsh` 脚本进行编译
 
 4. 若需调试 MaaFwAdbController（MaaFwAdb 触控模式）相关功能，需要[自行编译 MaaFramework](https://maafw.com/docs/4.1-BuildGuide) 的 Debug 版本，将 `libMaaAdbControlUnit.so` 放到安装目录下。
    ::::
+
+## 编译 MaaWpfGui
+
+::: info
+MaaWpfGui 适用于 Windows，编译产物在 Linux 上需要通过 Wine 运行，详见[使用 Wine](../manual/device/linux.md#使用-wine)。
+:::
+
+:::: steps
+1. 安装 .NET SDK
+
+   ::: code-tabs
+   @tab:active Ubuntu/Debian
+
+   ```bash
+   sudo apt install dotnet-sdk-10.0
+   ```
+
+   @tab Arch
+
+   ```bash
+   sudo pacman -S --needed dotnet-sdk
+   ```
+
+   :::
+
+   另请参考[在 Linux 上安装 .NET](https://learn.microsoft.com/en-us/dotnet/core/install/linux)。
+
+2. 编译 MAA
+
+   在仓库根目录下运行：
+
+   ```bash
+   dotnet build src/MaaWpfGui/MaaWpfGui.csproj -p:Platform=x64
+   ```
+
+   首次编译时会自动下载依赖（该步骤称为“restore”）。
+
+3. 运行
+
+   将其他方式得到的 MaaCore.dll 置于 build/bin/Debug。
+
+   ```bash
+   wine build/bin/Debug/MAA.exe
+   ```
+::::
 
 ## 集成文档
 
