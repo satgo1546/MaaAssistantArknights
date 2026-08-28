@@ -218,6 +218,41 @@ public class GuiSettingsUserControlModel : PropertyChangedBase
         }
     }
 
+    private bool _useDpiOverride = ConfigFactory.Root.Gui.DpiOverride is >= DpiHelper.MinimumDpi and <= DpiHelper.MaximumDpi;
+
+    public bool UseDpiOverride
+    {
+        get => _useDpiOverride;
+        set {
+            if (!SetAndNotify(ref _useDpiOverride, value))
+            {
+                return;
+            }
+
+            ConfigFactory.Root.Gui.DpiOverride = value ? CustomDpi : 0;
+            DpiHelper.ApplyToAllWindows();
+        }
+    }
+
+    private int _customDpi = ConfigFactory.Root.Gui.DpiOverride is >= DpiHelper.MinimumDpi and <= DpiHelper.MaximumDpi
+        ? ConfigFactory.Root.Gui.DpiOverride
+        : DpiHelper.DefaultDpi;
+
+    public int CustomDpi
+    {
+        get => _customDpi;
+        set {
+            value = Math.Clamp(value, DpiHelper.MinimumDpi, DpiHelper.MaximumDpi);
+            if (!SetAndNotify(ref _customDpi, value) || !UseDpiOverride)
+            {
+                return;
+            }
+
+            ConfigFactory.Root.Gui.DpiOverride = value;
+            DpiHelper.ApplyToAllWindows();
+        }
+    }
+
     /// <summary>
     /// 将过渡速度档位同步到过渡控件的全局时长，启动与切换档位时调用，改档立即生效。
     /// </summary>

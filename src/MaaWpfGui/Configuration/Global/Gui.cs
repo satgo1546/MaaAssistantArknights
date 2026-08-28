@@ -61,6 +61,11 @@ public class Gui : NotifyPropertyChangedWithValue
 
     public TransitionSpeedType TransitionSpeed { get; set; } = TransitionSpeedType.Normal;
 
+    /// <summary>
+    /// Gets or sets the DPI used by WPF. A value of 0 keeps automatic detection enabled.
+    /// </summary>
+    public int DpiOverride { get; set; }
+
     public bool TaskQueueInverseMode { get; set; }
 
     public bool UseCardLog { get; set; } = true;

@@ -34,6 +34,8 @@
     <system:String x:Key="TransitionSpeedNormal">原速</system:String>
     <system:String x:Key="TransitionSpeedFast">快速</system:String>
     <system:String x:Key="TransitionSpeedNone">無動畫</system:String>
+    <system:String x:Key="DpiOverride">覆寫自動偵測的 DPI</system:String>
+    <system:String x:Key="DpiOverrideTip">為所有 MAA 視窗覆寫 WPF 偵測到的 DPI。僅在自動偵測結果有誤時啟用。</system:String>
     <system:String x:Key="HotKeySettings">熱鍵設定</system:String>
     <system:String x:Key="UpdateSettings">更新設定</system:String>
     <system:String x:Key="AchievementSettings">成就設定</system:String>

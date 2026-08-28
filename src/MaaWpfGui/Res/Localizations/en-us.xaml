@@ -34,6 +34,8 @@
     <system:String x:Key="TransitionSpeedNormal">Normal</system:String>
     <system:String x:Key="TransitionSpeedFast">Fast</system:String>
     <system:String x:Key="TransitionSpeedNone">None</system:String>
+    <system:String x:Key="DpiOverride">Override detected DPI</system:String>
+    <system:String x:Key="DpiOverrideTip">Overrides the DPI detected by WPF for all MAA windows. Only enable this when automatic detection is incorrect.</system:String>
     <system:String x:Key="HotKeySettings">HotKeys</system:String>
     <system:String x:Key="UpdateSettings">Update</system:String>
     <system:String x:Key="AchievementSettings">Achievements</system:String>

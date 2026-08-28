@@ -582,16 +582,8 @@ public partial class OverlayWindow : Window
         _overlayWidth = Math.Max(1, (int)Math.Ceiling(border.ActualWidth));
         _overlayHeight = Math.Max(1, (int)Math.Ceiling(border.ActualHeight));
 
-        var source = PresentationSource.FromVisual(this);
-        if (source?.CompositionTarget == null)
-        {
-            return;
-        }
-
-        var transform = source.CompositionTarget.TransformFromDevice;
-        var transformToDevice = source.CompositionTarget.TransformToDevice;
-        var topLeft = transform.Transform(new Point(rect.left, rect.top));
-        var bottomRight = transform.Transform(new Point(rect.right, rect.bottom));
+        var topLeft = DpiHelper.FromDevice(this, new Point(rect.left, rect.top));
+        var bottomRight = DpiHelper.FromDevice(this, new Point(rect.right, rect.bottom));
         var newWidthWpf = Math.Max(0, bottomRight.X - topLeft.X);
         var newHeightWpf = Math.Max(0, bottomRight.Y - topLeft.Y);
         double availableWidth = Math.Max(0, newWidthWpf - OverlayMarginLeft - OverlayMarginRight);
@@ -600,7 +592,7 @@ public partial class OverlayWindow : Window
         border.MaxHeight = availableHeight;
 
         border.Measure(new Size(border.MaxWidth, border.MaxHeight));
-        var desiredSizeInPixels = transformToDevice.Transform(new Point(border.DesiredSize.Width, border.DesiredSize.Height));
+        var desiredSizeInPixels = DpiHelper.ToDevice(this, new Point(border.DesiredSize.Width, border.DesiredSize.Height));
         _overlayWidth = Math.Max(1, (int)Math.Ceiling(desiredSizeInPixels.X));
         _overlayHeight = Math.Max(1, (int)Math.Ceiling(desiredSizeInPixels.Y));
     }
@@ -631,13 +623,7 @@ public partial class OverlayWindow : Window
 
     private (int Left, int Top) GetOverlayMarginInPixels()
     {
-        var source = PresentationSource.FromVisual(this);
-        if (source?.CompositionTarget == null)
-        {
-            return ((int)Math.Round(OverlayMarginLeft), (int)Math.Round(OverlayMarginTop));
-        }
-
-        var margin = source.CompositionTarget.TransformToDevice.Transform(new Point(OverlayMarginLeft, OverlayMarginTop));
+        var margin = DpiHelper.ToDevice(this, new Point(OverlayMarginLeft, OverlayMarginTop));
         return ((int)Math.Round(margin.X), (int)Math.Round(margin.Y));
     }
 

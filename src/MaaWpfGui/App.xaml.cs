@@ -14,6 +14,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Documents;
+using MaaWpfGui.Helper;
 using MaaWpfGui.WineCompat;
 using MaaWpfGui.WineCompat.FontConfig;
 using Serilog;
@@ -42,6 +43,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        DpiHelper.Initialize();
+
         if (WineRuntimeInformation.IsRunningUnderWine && MaaDesktopIntegration.Available)
         {
             // override buintin font map as early as possible

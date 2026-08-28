@@ -34,6 +34,8 @@
     <system:String x:Key="TransitionSpeedNormal">標準</system:String>
     <system:String x:Key="TransitionSpeedFast">高速</system:String>
     <system:String x:Key="TransitionSpeedNone">なし</system:String>
+    <system:String x:Key="DpiOverride">検出された DPI を上書き</system:String>
+    <system:String x:Key="DpiOverrideTip">すべての MAA ウィンドウで WPF が検出した DPI を上書きします。自動検出が正しくない場合のみ有効にしてください。</system:String>
     <system:String x:Key="HotKeySettings">ホットキー設定</system:String>
     <system:String x:Key="UpdateSettings">アップデート設定</system:String>
     <system:String x:Key="AchievementSettings">実績設定</system:String>
