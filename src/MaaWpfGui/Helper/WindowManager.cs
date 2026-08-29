@@ -59,6 +59,7 @@ public class WindowManager : Stylet.WindowManager
     protected override Window CreateWindow(object viewModel, bool isDialog, IViewAware ownerViewModel)
     {
         Window window = base.CreateWindow(viewModel, isDialog, ownerViewModel);
+        DpiHelper.Attach(window);
         if (window is RootView)
         {
             HandyControl.Controls.Dialog.Register(nameof(RootView), window);

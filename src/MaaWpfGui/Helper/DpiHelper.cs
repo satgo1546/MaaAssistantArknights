@@ -11,16 +11,21 @@
 // but WITHOUT ANY WARRANTY
 // </copyright>
 
+#nullable enable
+
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using MaaWpfGui.Configuration.Factory;
 
 namespace MaaWpfGui.Helper;
 
 /// <summary>
-/// Applies the configured DPI override to WPF root visual trees.
+/// Applies the configured DPI override through WPF's complete HWND DPI-change path.
 /// </summary>
 public static class DpiHelper
 {
@@ -28,7 +33,23 @@ public static class DpiHelper
     public const int MinimumDpi = 48;
     public const int MaximumDpi = 960;
 
-    private static readonly ConditionalWeakTable<Window, DetectedDpi> _detectedDpi = new();
+    private static readonly ConditionalWeakTable<Window, DetectedDpi> _detectedDpi = [];
+
+    // WPF exposes the notification types but keeps the method that performs the complete
+    // HwndTarget/world-transform/layout update internal. Keep this reflection localized here.
+    private static readonly ConstructorInfo? _dpiChangedEventArgsConstructor = typeof(HwndDpiChangedEventArgs).GetConstructor(
+        BindingFlags.Instance | BindingFlags.NonPublic,
+        binder: null,
+        [typeof(DpiScale), typeof(DpiScale), typeof(Rect)],
+        modifiers: null);
+
+    private static readonly MethodInfo? _changeDpiMethod = typeof(HwndSource).GetMethod(
+        "ChangeDpi",
+        BindingFlags.Instance | BindingFlags.NonPublic,
+        binder: null,
+        [typeof(HwndDpiChangedEventArgs)],
+        modifiers: null);
+
     private static bool _initialized;
 
     /// <summary>
@@ -43,6 +64,15 @@ public static class DpiHelper
 
         EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent, new RoutedEventHandler(OnWindowLoaded));
         _initialized = true;
+    }
+
+    /// <summary>
+    /// Attaches the DPI override before a window's placement is restored.
+    /// </summary>
+    /// <param name="window">The window being created.</param>
+    public static void Attach(Window window)
+    {
+        window.SourceInitialized += OnWindowSourceInitialized;
     }
 
     /// <summary>
@@ -72,8 +102,8 @@ public static class DpiHelper
     /// <returns>The point in WPF logical units.</returns>
     public static Point FromDevice(Visual visual, Point point)
     {
-        var dpi = VisualTreeHelper.GetDpi(visual);
-        return new Point(point.X / dpi.DpiScaleX, point.Y / dpi.DpiScaleY);
+        var transform = PresentationSource.FromVisual(visual)?.CompositionTarget?.TransformFromDevice;
+        return transform?.Transform(point) ?? point;
     }
 
     /// <summary>
@@ -84,8 +114,8 @@ public static class DpiHelper
     /// <returns>The point in device pixels.</returns>
     public static Point ToDevice(Visual visual, Point point)
     {
-        var dpi = VisualTreeHelper.GetDpi(visual);
-        return new Point(point.X * dpi.DpiScaleX, point.Y * dpi.DpiScaleY);
+        var transform = PresentationSource.FromVisual(visual)?.CompositionTarget?.TransformToDevice;
+        return transform?.Transform(point) ?? point;
     }
 
     private static void OnWindowLoaded(object sender, RoutedEventArgs e)
@@ -96,14 +126,73 @@ public static class DpiHelper
         }
     }
 
+    private static void OnWindowSourceInitialized(object? sender, EventArgs e)
+    {
+        if (sender is Window window)
+        {
+            Apply(window);
+        }
+    }
+
     private static void Apply(Window window)
     {
-        int dpiOverride = ConfigFactory.Root.Gui.DpiOverride;
-        if (dpiOverride is >= MinimumDpi and <= MaximumDpi) {
-            var e = VisualTreeHelper.GetDpi(window);
-            MessageBox.Show($"Current DPI scale: {e.DpiScaleX} {e.DpiScaleY} {e.PixelsPerDip} {e.PixelsPerInchX} {e.PixelsPerInchY}");
-            VisualTreeHelper.SetRootDpi(window, new DpiScale((double)dpiOverride / DefaultDpi, (double)dpiOverride / DefaultDpi));
+        if (PresentationSource.FromVisual(window) is not HwndSource source ||
+            source.CompositionTarget == null ||
+            _dpiChangedEventArgsConstructor == null ||
+            _changeDpiMethod == null)
+        {
+            return;
         }
+
+        var current = GetDpi(source);
+        var detected = _detectedDpi.GetValue(window, _ => new DetectedDpi(current)).Value;
+        int dpiOverride = ConfigFactory.Root.Gui.DpiOverride;
+        var effective = dpiOverride is >= MinimumDpi and <= MaximumDpi
+            ? new DpiScale((double)dpiOverride / DefaultDpi, (double)dpiOverride / DefaultDpi)
+            : detected;
+
+        if (AreClose(current, effective) || !GetWindowRect(source.Handle, out NativeRect windowRect))
+        {
+            return;
+        }
+
+        var suggestedRect = new Rect(
+            windowRect.Left,
+            windowRect.Top,
+            Math.Max(1, windowRect.Width * effective.DpiScaleX / current.DpiScaleX),
+            Math.Max(1, windowRect.Height * effective.DpiScaleY / current.DpiScaleY));
+        var eventArgs = _dpiChangedEventArgsConstructor.Invoke([current, effective, suggestedRect]);
+        _changeDpiMethod.Invoke(source, [eventArgs]);
+    }
+
+    private static DpiScale GetDpi(HwndSource source)
+    {
+        var transform = source.CompositionTarget!.TransformToDevice;
+        return new DpiScale(transform.M11, transform.M22);
+    }
+
+    private static bool AreClose(DpiScale left, DpiScale right)
+    {
+        const double tolerance = 0.000001;
+        return Math.Abs(left.DpiScaleX - right.DpiScaleX) < tolerance &&
+               Math.Abs(left.DpiScaleY - right.DpiScaleY) < tolerance;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetWindowRect(IntPtr hWnd, out NativeRect lpRect);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private readonly struct NativeRect
+    {
+        public readonly int Left;
+        public readonly int Top;
+        public readonly int Right;
+        public readonly int Bottom;
+
+        public int Width => Right - Left;
+
+        public int Height => Bottom - Top;
     }
 
     private sealed record DetectedDpi(DpiScale Value);
