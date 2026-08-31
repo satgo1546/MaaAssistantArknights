@@ -42,9 +42,7 @@ Mac 可以使用 `tools/build_macos_universal.zsh` 脚本进行编译
    可以选择下载预构建的依赖库或从头进行编译
    - 下载预构建的第三方库 (推荐)
 
-     > [!Note]
-     > ~~包含在相对较新的 Linux 发行版 (Ubuntu 22.04) 中编译的动态库, 如果您系统中的 libstdc++ 版本较老, 可能遇到 ABI 不兼容的问题~~  
-     > 目前已经基于交叉编译降低了运行环境, 仅需要依赖 glibc 2.31 (ubuntu 20.04).
+     这些库基于 [MaaLinuxToolchain](https://github.com/MaaXYZ/MaaLinuxToolchain) 工具链交叉编译，仅需要依赖 glibc 2.31（Ubuntu 20.04）。
 
      ```bash
      python tools/maadeps-download.py
@@ -65,20 +63,18 @@ Mac 可以使用 `tools/build_macos_universal.zsh` 脚本进行编译
 3. 编译 MAA
 
    ```bash
-   cmake -B build \
-       -DINSTALL_RESOURCE=ON \
-       -DINSTALL_PYTHON=ON \
-       -DCMAKE_TOOLCHAIN_FILE=src/MaaUtils/MaaDeps/cmake/maa-x64-linux-toolchain.cmake
+   cmake --preset linux-x64
    cmake --build build
    ```
 
-   来将 MAA 安装到目标位置, 注意 MAA 推荐通过指定 `LD_LIBRARY_PATH` 来运行, 不要使用管理员权限将 MAA 装入 `/usr`
-
-   > 现在应该不需要指定 `LD_LIBRARY_PATH` 即可运行
+   此步骤会生成 `build/bin/Debug/libMaaCore.so`（以及 `libMaaUtils.so`）。如果编译正常完成，可以运行
 
    ```bash
    cmake --install build --prefix <target_directory>
    ```
+
+////////////////////////////////////////////////指定 `LD_LIBRARY_PATH` 来运
+   来将编译产物安装（复制）到目标位置。注意 MAA 推荐通过指定动态库文件路径来运行，不要使用管理员权限将 MAA 装入 `/usr`。
 
 4. 若需调试 MaaFwAdbController（MaaFwAdb 触控模式）相关功能，需要[自行编译 MaaFramework](https://maafw.com/docs/4.1-BuildGuide) 的 Debug 版本，将 `libMaaAdbControlUnit.so` 放到安装目录下。
    ::::
@@ -117,11 +113,11 @@ MaaWpfGui 适用于 Windows，编译产物在 Linux 上需要通过 Wine 运行�
    dotnet build src/MaaWpfGui/MaaWpfGui.csproj -p:Platform=x64
    ```
 
-   首次编译时会自动下载依赖（该步骤称为“restore”）。
+   首次编译时会自动下载依赖。此步骤会生成 `build/bin/Debug/MAA.exe`。
 
 3. 运行
 
-   将其他方式得到的 MaaCore.dll 置于 build/bin/Debug。
+   上一步中生成的 `MAA.exe` 还需要配合 `MaaCore.dll` 才能运行。将其他方式得到的 MaaCore.dll 置于 build/bin/Debug。
 
    ```bash
    wine build/bin/Debug/MAA.exe
