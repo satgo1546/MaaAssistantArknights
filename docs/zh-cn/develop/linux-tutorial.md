@@ -67,14 +67,13 @@ Mac 可以使用 `tools/build_macos_universal.zsh` 脚本进行编译
    cmake --build build
    ```
 
-   此步骤会生成 `build/bin/Debug/libMaaCore.so`（以及 `libMaaUtils.so`）。如果编译正常完成，可以运行
+   此步骤会生成 `build/bin/Debug/libMaaCore.so`（以及 `libMaaUtils.so`）。可以将其留在原位调用进行调试开发，也可以运行
 
    ```bash
    cmake --install build --prefix <target_directory>
    ```
 
-////////////////////////////////////////////////指定 `LD_LIBRARY_PATH` 来运
-   来将编译产物安装（复制）到目标位置。注意 MAA 推荐通过指定动态库文件路径来运行，不要使用管理员权限将 MAA 装入 `/usr`。
+   来将编译产物安装（复制）到目标位置。注意 MAA 推荐通过指定动态库文件路径或 `LD_LIBRARY_PATH` 来运行，不要使用 root 权限将 MAA 装入 `/usr`。
 
 4. 若需调试 MaaFwAdbController（MaaFwAdb 触控模式）相关功能，需要[自行编译 MaaFramework](https://maafw.com/docs/4.1-BuildGuide) 的 Debug 版本，将 `libMaaAdbControlUnit.so` 放到安装目录下。
    ::::
